@@ -9,15 +9,15 @@ class CalculationsController < ApplicationController
     # The text the user input is in the string @text.
     # The special word the user input is in the string @special_word.
     # ================================================================================
+    text_ary = @text.split(" ")
 
+    @character_count_with_spaces = @text.length
 
-    @character_count_with_spaces = "Replace this string with your answer."
+    @character_count_without_spaces = text_ary.join.length
 
-    @character_count_without_spaces = "Replace this string with your answer."
-
-    @word_count = "Replace this string with your answer."
-
-    @occurrences = "Replace this string with your answer."
+    @word_count = text_ary.length
+    lc_text_ary = text_ary.map { |z| z.downcase }
+    @occurrences = lc_text_ary.count(@special_word.downcase)
 
     # ================================================================================
     # Your code goes above.
@@ -37,8 +37,10 @@ class CalculationsController < ApplicationController
     # The number of years the user input is in the integer @years.
     # The principal value the user input is in the decimal @principal.
     # ================================================================================
-
-    @monthly_payment = "Replace this string with your answer."
+    periods = @years * 12
+    monthly_interest = @apr/1200 #divided by 100 to get percent and then by 12 to get per month
+    pv_annuity = ((1 -((1+monthly_interest)**(-1*periods)))/monthly_interest) # Present Value of Annuity
+    @monthly_payment = (@principal/pv_annuity).round(2)
 
     # ================================================================================
     # Your code goes above.
@@ -60,12 +62,12 @@ class CalculationsController < ApplicationController
     #   number of seconds as a result.
     # ================================================================================
 
-    @seconds = "Replace this string with your answer."
-    @minutes = "Replace this string with your answer."
-    @hours = "Replace this string with your answer."
-    @days = "Replace this string with your answer."
-    @weeks = "Replace this string with your answer."
-    @years = "Replace this string with your answer."
+    @seconds = @ending - @starting
+    @minutes = @seconds/60
+    @hours = @minutes/60
+    @days = @hours/24
+    @weeks = @days/7
+    @years = @days/365.25
 
     # ================================================================================
     # Your code goes above.
@@ -82,27 +84,130 @@ class CalculationsController < ApplicationController
     # The numbers the user input are in the array @numbers.
     # ================================================================================
 
-    @sorted_numbers = "Replace this string with your answer."
+    @sorted_numbers = @numbers.sort
 
-    @count = "Replace this string with your answer."
+    @count = @numbers.length
 
-    @minimum = "Replace this string with your answer."
+    def find_minimum x
+      tick = 0
+      while tick < x.length
+        if tick == 0
+          y = x[tick]
+        else
+          if x[tick] < y
+            y = x[tick]
+          end
+        end
+        tick = tick + 1
+      end
+      y
+    end
 
-    @maximum = "Replace this string with your answer."
+    @minimum = find_minimum @numbers
 
-    @range = "Replace this string with your answer."
+    def find_maximum x
+      tick = 0
+      while tick < x.length
+        if tick == 0
+          y = x[tick]
+        else
+          if x[tick] > y
+            y = x[tick]
+          end
+        end
+        tick = tick + 1
+      end
+      y
+    end
 
-    @median = "Replace this string with your answer."
+    @maximum = find_maximum @numbers
 
-    @sum = "Replace this string with your answer."
+    @range = @maximum - @minimum
 
-    @mean = "Replace this string with your answer."
+    def find_median x
+      x = x.sort
+      if x.length.odd?
+        point = x.length/2
+        median = x[point]
+      else
+        point_1 = (x.length/2) - 1
+        point_2 = x.length/2
+        median = (x[point_1] + x[point_2])/2
+      end
+      median
+    end
 
-    @variance = "Replace this string with your answer."
+    @median = find_median @numbers
 
-    @standard_deviation = "Replace this string with your answer."
+    def find_sum x
+      tick = 0
+      sum = 0
+      while tick < x.length
+        sum = sum + x[tick]
+        tick = tick + 1
+      end
+      sum
+    end
 
-    @mode = "Replace this string with your answer."
+    @sum = find_sum @numbers
+
+    @mean = @sum/@count
+
+    ave_diff_sq = @numbers.map { |x| (x - @mean)**2 }
+
+    @variance = (find_sum ave_diff_sq)/ave_diff_sq.length
+
+    @standard_deviation = @variance**0.5
+
+
+    def find_mode x_array
+
+      def find_unique_array x #Creates an array of only unique value and the counts of their occurrance
+        tick = 0
+        y = Array.new
+        while tick < x.length
+          if tick == 0
+            y.push  [x[tick], 1]
+          else
+            sub_tick = 0
+            while sub_tick < y.length
+              if y[sub_tick][0] == x[tick]
+                unique = false
+                y[sub_tick][1] = y[sub_tick][1] + 1
+                break
+              else
+                unique = true
+                sub_tick = sub_tick + 1
+              end
+            end
+            if unique
+              y.push [x[tick], 1]
+            end
+          end
+          tick = tick + 1
+        end
+        y
+      end
+
+      def max_position x #Finds and returns the maximum position
+        tick = 0
+        position = tick
+        while tick < x.length
+          y = x[position]
+          if y[1] < x[tick][1]
+            position = tick
+          end
+          tick = tick + 1
+        end
+        position
+      end
+
+      unique_array = find_unique_array x_array
+      mode_position = max_position unique_array
+      mode_found = unique_array[mode_position][0]
+    end
+
+    @mode = find_mode @numbers
 
     # ================================================================================
     # Your code goes above.
